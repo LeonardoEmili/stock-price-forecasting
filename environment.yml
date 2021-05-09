@@ -13,4 +13,5 @@ dependencies:
   - tqdm
   - pip:
     - torch
+    - pytorch_lightning
     - jupyter
