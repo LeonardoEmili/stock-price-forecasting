@@ -1,5 +1,0 @@
-dropout: 0.5
-hidden_dim: 512
-input_dim: 34
-num_layers: 1
-window_size: 20
