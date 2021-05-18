@@ -1,0 +1,120 @@
+\documentclass{article}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{overpic}
+\usepackage{amssymb}
+
+\usepackage[accepted]{dlai2021}
+
+%%% STUDENTS: FILL IN WITH YOUR OWN INFORMATION
+\dlaititlerunning{DLAI Project Template (replace with your title)}
+
+\begin{document}
+
+\twocolumn[
+%%% STUDENTS: FILL IN WITH YOUR OWN INFORMATION
+\dlaititle{Stock Price Forecasting using LSTM}
+
+\begin{center}\today\end{center}
+
+\begin{dlaiauthorlist}
+%%% STUDENTS: FILL IN WITH YOUR OWN INFORMATION
+\dlaiauthor{Leonardo Emili}{}
+\dlaiauthor{Alessio Luciani}{}
+\end{dlaiauthorlist}
+
+%%% STUDENTS: FILL IN WITH YOUR OWN INFORMATION
+\dlaicorrespondingauthor{Leonardo Emili}{emili.1802989@studenti.uniroma1.it}
+\dlaicorrespondingauthor{Alessio Luciani}{luciani.1797637@studenti.uniroma1.it}
+
+\vskip 0.3in
+]
+
+\printAffiliationsAndNotice{}
+
+\begin{abstract}
+%
+This is a \LaTeX template for writing your project report, to be submitted as part of the final exam. The template can not be modified (you can not change margins, spaces, etc.), and using this template is mandatory. Please read the main text for further details.
+%
+\end{abstract}
+
+% ------------------------------------------------------------------------------
+\section{Project submission}
+
+Once you have finished your project, you are required to submit a report using this template. In principle, the only files you need to modify are ``main.tex'' and ``bibliography.tex'' (see Section~\ref{sec:latex} for more details). Hence, you can simply take this document and modify it directly with your own content.
+
+\paragraph*{Limits.}
+The report must have at most 2 pages, without counting the bibliography, which can go to page 3. If you did your project with another student, then your budget is extended to at most 3 pages plus bibliography.
+
+\paragraph*{Code.} 
+Submitting your code is part of the exam. It need not be public (although we encourage it), but at least we must be able to access it for proper evaluation. One possibility is to put your code on a github repository. Please link the code directly from the report, example link: \url{https://github.com/erodola/DLAI-s2-2021}.
+
+% ------------------------------------------------------------------------------
+\section{Report structure}
+
+There is no mandatory structure to adopt, but a typical report should look as follows. 1) An \textbf{introduction} section where the problem is presented, and the overall proposed approach is briefly described; 2) a \textbf{related work} section; 3) a \textbf{method} section, where the main methodology used for the project is described; 4) experimental \textbf{results} (qualitative, quantitative, or both); 5) \textbf{discussion and conclusions}.
+
+% ------------------------------------------------------------------------------
+\section{Using \LaTeX}\label{sec:latex}
+
+If this is your first time using \LaTeX, here are a few common instructions that you may find useful. Please read this while looking at the source code.
+
+\paragraph*{Formulas.}
+You can write formulas inline, such as $x^2$, or you can put them in their own environment, for example:
+%
+\begin{equation}\label{eq:dirichlet}
+\lambda_i = \int_\mathcal{X} \langle \nabla \phi_i(x), \nabla \phi_i(x) \rangle dx \,.
+\end{equation}
+
+You can also refer to formulas without having to write their equation number by hand, such as Equation~\eqref{eq:dirichlet}.
+
+\paragraph*{Figures.}
+You can and are encouraged to include figures. See an example with Figure~\ref{fig:torus}.
+
+\begin{figure}[t]
+    \centering
+    \begin{overpic}[width=0.99\linewidth]{./torus.png}
+    \put(-1, 21){\color{blue}\footnotesize $\mathcal{M}_2$ }
+    \put(13, 12){\color{red}\footnotesize $\mathcal{M}_1$ }
+    \put(93, 30){\footnotesize $\mathcal{Z}$ }
+    \put(79, 26){\scriptsize $z_2$ }
+    \put(88, 26){\scriptsize $z_1$ }
+    \end{overpic}
+    \caption{In the figure caption, you can write what you want including formulas, e.g. $\mathcal{X} \subset \mathbb{R}^3$. Notice that in this figure, we added mathematical symbols on top of the image by using the overpic command.}
+    \label{fig:torus}
+\end{figure}
+
+\paragraph*{Table.}
+Tables can be used to report quantitative results, here is one random example:
+
+\begin{table}[h!]
+\caption{Performance comparison.}
+\label{tab:results}
+\begin{center}
+\begin{small}
+\begin{tabular}{p{0.16\linewidth} | ccccc}
+\toprule
+& \multirow{2}{0.1\linewidth}{$\beta$ VAE}& \multirow{2}{0.1\linewidth}{DCI Dis.}& \multirow{2}{0.1\linewidth}{MIG}& \multirow{2}{0.1\linewidth}{MIG-PCA}& \multirow{2}{0.1\linewidth}{MIG-KM}\\
+\#factors \\
+\midrule
+One      & 100\% & \textbf{99.0\%} &  63.7\% & 73.5\% &  69.2\%  \\
+Variable & 98.9\% & 94.9\% & 62.3\% &  70.5\%& \textbf{66.9\%} \\
+\bottomrule
+\end{tabular}
+\end{small}
+\end{center}
+\vspace{-0.5cm}
+\end{table}
+
+\paragraph*{Bibliography.}
+This is an example bibliographic reference \cite{anderson2008end}. If you want to add more, you must edit the file ``references.bib''.
+
+
+\bibliography{references.bib}
+\bibliographystyle{dlai2021}
+
+\end{document}
+
