@@ -45,7 +45,7 @@
 \section{Introdution}
 
 Stock price prediction is an active field of study where the objective goal is to predict the trend of the stock market, typically based on its historical evidence. Over the years, many methods have been proposed to tackle the task: ranging from the Naive Forecast approach, which trivially forecasts the stock value to be the last observed one, up to the most recent ones that heavily rely on machine learning techniques. In this context, we will delve into the topic of stock price prediction using fundamental data to assess whether a stock is attractive to investors. 
-This technique, as opposed to technical analysis, considers corporate statics, as well as financial reports, to model the problem. Here, the underlying assumption is that one cannot tell whether it's worth buying a stock only by looking at its current price and volumes. Indeed, quarterly released financial reports about companies and external information (e.g. the common sentiment on a stock ticker) may be crucial to assess the quality of a given stock. In this project, we experimented with the effectiveness of deep learning techniques applied to the stock price prediction task. The key idea is the use of recurrent neural networks that are able to exploit temporal dependencies of events, hence conditioning the presence of an event at timestep \emph{t} on the previous events at \emph{t-1, t-2, \ldots}. 
+This technique, as opposed to technical analysis, considers prices, as well as financial reports, to model the problem. Here, the underlying assumption is that one cannot tell whether it's worth buying a stock only by looking at its current price and volumes. Indeed, quarterly released financial reports about companies and external information (e.g. the common sentiment on a stock ticker) may be crucial to assess the quality of a given stock. In this project, we experimented with the effectiveness of deep learning techniques applied to the stock price prediction task. The key idea is the use of recurrent neural networks that are able to exploit temporal dependencies of events, hence conditioning the presence of an event at timestep \emph{t} on the previous events at \emph{t-1, t-2, \ldots}. 
 
 % ------------------------------------------------------------------------------
 \section{Related work}
@@ -59,7 +59,48 @@ Data wrangling operations have been crucial for this task. In fact, we start con
 
 \subsection{Feature engineering}
 
-We fast-forward values whenever possible, otherwise replacing missing values with constant values (i.e. zero paddings). The intuition here is that if there are missing values at the beginning of the history of a stock, it means that the feature is not available, otherwise referring to the latest value as the most updated one. As an example, consider holidays when markets are closed, and the price does not change since no orders are placed. We also fill the dataset with missing working days using the same fast-forward strategy. Furthermore, we perform massive feature engineering steps adding technical indicators such as SMA and RSI. (\underline{\textbf{TODO}}: Explain how these indicators work and why we think they are important for our task, explain feature scaling, explain 2012-2013 train/dev/test splits). In order to predict the target adjusted close price, we consider the dataset according to the sliding window approach, also known as the lag method. In this way, we decompose the original dataset with overlapping windows and condition the target value only on its lag. During the training phase, we treat both the step size (i.e. the number of days before a new window) and the window size (i.e. the size of the lag) as hyperparameters and tune them accordingly.
+We fill forward values whenever possible, we otherwise replace missing values with constant values (i.e. zero paddings). The intuition here is that if there are missing values at the beginning of the history of a stock, it means that the feature is not available, otherwise referring to the latest value as the most up-to-date one. As an example, consider holidays when markets are closed, and the price does not change since no orders are placed. We also fill the dataset with missing working days using the same forward-fill strategy.
+Furthermore, we perform significant feature engineering steps adding technical indicators
+such as SMA and RSI. The SMA is computed by averaging the prices of a given number of multiple
+contiguous time steps. The RSI was, instead, computed using the relative strength formula
+\cite{rsi}.
+
+$$
+U = max(0, closeNow - closePrevious)
+$$
+$$
+D = max(0, closePrevious - closeNow)
+$$
+$$
+RS = SMMA(U,n)/SMMA(D,n)
+$$
+$$
+RSI = 100 - 100/(1+RS)
+$$
+
+It takes into account the differences in contiguous prices, with respect to the
+exponentially smoothed moving average. Therefore, it makes it easy to spot overbought
+and oversold events. In fact, using this technical indicator, we could extract the
+overbought and oversold binary features too. According to the RSI definition,
+a value that goes higher than 70 can be interpreted as a situation of overbought.
+Similarly, a value that goes below 30 is seen as a situation of oversold. An articulated
+model could of course extract this kind of information directly from the price, but manually
+adding these knownly meaningful indicators definitely simplifies the work of the network.
+Another step of the feature engineering process involved scaling the features to put them
+on similar scales. This step was very important considering that we are using gradient
+descent to optimize the models and having features with completely different scales would
+have made the convergence task much harder. Therefore, we globally scaled prices,
+volumes, technical indicator values, fundamentals, etc. At this point, all the features
+were centered on the same scale.
+Before training the model, we split the dataset into three subsets: \emph{train set},
+\emph{dev set} and \emph{test set}. These are respectively meant for training the model,
+tuning its hyperparameters and testing its performance. Since the core idea of the project
+is forecasting future events by looking at past data, we cannot leak future information in
+the train set. Therefore, we split the dataset by years. Having temporal data ranging from
+2004 to 2013, we dedicate the years 2004 - 2011 to the train set, 2012 to the dev set, and
+2013 to the test set. This way, the procedure is similar to backtesting the model strategy
+on present events.
+In order to predict the target adjusted close price, we consider the dataset according to the sliding window approach, also known as the lag method. In this way, we decompose the original dataset with overlapping windows and condition the target value only on its lag. During the training phase, we treat both the step size (i.e. the number of days before a new window) and the window size (i.e. the size of the lag) as hyperparameters and tune them accordingly.
 
 % ------------------------------------------------------------------------------
 \section{Models}
@@ -94,7 +135,7 @@ In this section, we present a subset of the hyperparameters used. However, it is
 % ------------------------------------------------------------------------------
 \section{Experimental results}
 
-As the evaluation framework, we consider multiple metrics in order to assess the quality of a particular model. Since we are dealing with a regression task it comes naturally to adopt the Mean Squared Error (MSE) measure as a proxy to indicate how well a model performs. We also consider the R-squared statistical measure to check how similar the predicted and the observed data are similar. However, since we are aware that R-squared increases when adding more independent variables, we use the adjusted r-squared. Its formulation is similar to the one of r-square and only differs from the degrees of freedom. Finally, we measure the real performances of our system according to the return of a trading strategy. The system is designed to buy whenever the predicted price is higher than the current one, and when the day after we close the position, we register the gain or the loss.
+As an evaluation framework, we consider multiple metrics in order to assess the quality of a particular model. Since we are dealing with a regression task it comes naturally to adopt the Mean Squared Error (MSE) measure as a proxy to indicate how well a model performs. We also consider the R-squared statistical measure to check how similar the predicted and the observed data are similar. However, since we are aware that R-squared increases when adding more independent variables, we use the adjusted r-squared. Its formulation is similar to the one of r-square and only differs from the degrees of freedom. Finally, we measure the real performances of our system according to the return of a trading strategy. The system is designed to buy whenever the predicted price is higher than the current one, and when the day after we close the position, we register the gain or the loss.
 \underline{\textbf{TODO:}} explain what are our best performing models and the reasons why they perform so well.
 
 \begin{table}[h!]
