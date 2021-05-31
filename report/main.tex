@@ -10,7 +10,7 @@
 \usepackage[accepted]{dlai2021}
 
 %%% STUDENTS: FILL IN WITH YOUR OWN INFORMATION
-\dlaititlerunning{DLAI Project Template (replace with your title)}
+\dlaititlerunning{Stock Price Forecasting using LSTM}
 
 \begin{document}
 
@@ -35,83 +35,108 @@
 
 \printAffiliationsAndNotice{}
 
-\begin{abstract}
+%\begin{abstract}
 %
-This is a \LaTeX template for writing your project report, to be submitted as part of the final exam. The template can not be modified (you can not change margins, spaces, etc.), and using this template is mandatory. Please read the main text for further details.
+%This is a \LaTeX template for writing your project report, to be submitted as part of the final exam. The template can not be modified (you can not change margins, spaces, etc.), and using this template is mandatory. Please read the main text for further details.
 %
-\end{abstract}
+%\end{abstract}
 
 % ------------------------------------------------------------------------------
-\section{Project submission}
+\section{Introdution}
 
-Once you have finished your project, you are required to submit a report using this template. In principle, the only files you need to modify are ``main.tex'' and ``bibliography.tex'' (see Section~\ref{sec:latex} for more details). Hence, you can simply take this document and modify it directly with your own content.
-
-\paragraph*{Limits.}
-The report must have at most 2 pages, without counting the bibliography, which can go to page 3. If you did your project with another student, then your budget is extended to at most 3 pages plus bibliography.
-
-\paragraph*{Code.} 
-Submitting your code is part of the exam. It need not be public (although we encourage it), but at least we must be able to access it for proper evaluation. One possibility is to put your code on a github repository. Please link the code directly from the report, example link: \url{https://github.com/erodola/DLAI-s2-2021}.
+Stock price prediction is an active field of study where the objective goal is to predict the trend of the stock market, typically based on its historical evidence. Over the years, many methods have been proposed to tackle the task: ranging from the Naive Forecast approach, which trivially forecasts the stock value to be the last observed one, up to the most recent ones that heavily rely on machine learning techniques. In this context, we will delve into the topic of stock price prediction using fundamental data to assess whether a stock is attractive to investors. 
+This technique, as opposed to technical analysis, considers corporate statics, as well as financial reports, to model the problem. Here, the underlying assumption is that one cannot tell whether it's worth buying a stock only by looking at its current price and volumes. Indeed, quarterly released financial reports about companies and external information (e.g. the common sentiment on a stock ticker) may be crucial to assess the quality of a given stock. In this project, we experimented with the effectiveness of deep learning techniques applied to the stock price prediction task. The key idea is the use of recurrent neural networks that are able to exploit temporal dependencies of events, hence conditioning the presence of an event at timestep \emph{t} on the previous events at \emph{t-1, t-2, \ldots}. 
 
 % ------------------------------------------------------------------------------
-\section{Report structure}
+\section{Related work}
 
-There is no mandatory structure to adopt, but a typical report should look as follows. 1) An \textbf{introduction} section where the problem is presented, and the overall proposed approach is briefly described; 2) a \textbf{related work} section; 3) a \textbf{method} section, where the main methodology used for the project is described; 4) experimental \textbf{results} (qualitative, quantitative, or both); 5) \textbf{discussion and conclusions}.
+Some approaches have been explored in this direction, such as in \cite{32066186} where the authors apply LSTM, Stacked-LSTM, and Attention-Based LSTM into the prediction of stock prices. The authors also propose an evaluating framework to assess the quality of their models based on the return of the trading strategy. In another work \cite{mehtab2020stock}, the authors predict the open value of NIFTY 50 using different machine learning and deep learning models. They also demonstrate that using one-week prior data as input leads to good results.
 
 % ------------------------------------------------------------------------------
-\section{Using \LaTeX}\label{sec:latex}
+\section{Dataset}
 
-If this is your first time using \LaTeX, here are a few common instructions that you may find useful. Please read this while looking at the source code.
+Data wrangling operations have been crucial for this task. In fact, we start considering the S\&P 500 stock data, which is a collection of daily stock prices for all companies from the S\&P 500 index. This dataset provides us with the following features: open price, highest price, lowest price, close price, volume, stock ticker, and date. We also consider an auxiliary dataset that provides us with fundamental data from Yahoo Finance. The dataset contains the following columns: Forward P/E, DE Ratio, Earnings Growth, Enterprise Value/EBITDA, EBITDA, Current Ratio, Cash Flow, Trailing P/E, Beta, PEG Ratio, Gross Profit, Total Debt, Price, Return on Equity, Return on Assets, Price/Book, Revenue Growth, Operating Margin, Enterprise Value/Revenue, Revenue, Total Cash, Enterprise Value, Total Cash Per Share, Profit Margin, Price/Sales, Book Value Per Share, Diluted EPS, Market Cap, Revenue Per Share, Net Income Avl to Common, Ticker, Date. Based on the date column, we can align the two datasets such that for each event in the S\&P 500 dataset, we have the latest available financial report. From now on, we will refer to the dataset obtained from the alignment process simply as the dataset.
 
-\paragraph*{Formulas.}
-You can write formulas inline, such as $x^2$, or you can put them in their own environment, for example:
-%
-\begin{equation}\label{eq:dirichlet}
-\lambda_i = \int_\mathcal{X} \langle \nabla \phi_i(x), \nabla \phi_i(x) \rangle dx \,.
-\end{equation}
+\subsection{Feature engineering}
 
-You can also refer to formulas without having to write their equation number by hand, such as Equation~\eqref{eq:dirichlet}.
+We fast-forward values whenever possible, otherwise replacing missing values with constant values (i.e. zero paddings). The intuition here is that if there are missing values at the beginning of the history of a stock, it means that the feature is not available, otherwise referring to the latest value as the most updated one. As an example, consider holidays when markets are closed, and the price does not change since no orders are placed. We also fill the dataset with missing working days using the same fast-forward strategy. Furthermore, we perform massive feature engineering steps adding technical indicators such as SMA and RSI. (\underline{\textbf{TODO}}: Explain how these indicators work and why we think they are important for our task, explain feature scaling, explain 2012-2013 train/dev/test splits). In order to predict the target adjusted close price, we consider the dataset according to the sliding window approach, also known as the lag method. In this way, we decompose the original dataset with overlapping windows and condition the target value only on its lag. During the training phase, we treat both the step size (i.e. the number of days before a new window) and the window size (i.e. the size of the lag) as hyperparameters and tune them accordingly.
 
-\paragraph*{Figures.}
-You can and are encouraged to include figures. See an example with Figure~\ref{fig:torus}.
+% ------------------------------------------------------------------------------
+\section{Models}
 
-\begin{figure}[t]
-    \centering
-    \begin{overpic}[width=0.99\linewidth]{./torus.png}
-    \put(-1, 21){\color{blue}\footnotesize $\mathcal{M}_2$ }
-    \put(13, 12){\color{red}\footnotesize $\mathcal{M}_1$ }
-    \put(93, 30){\footnotesize $\mathcal{Z}$ }
-    \put(79, 26){\scriptsize $z_2$ }
-    \put(88, 26){\scriptsize $z_1$ }
-    \end{overpic}
-    \caption{In the figure caption, you can write what you want including formulas, e.g. $\mathcal{X} \subset \mathbb{R}^3$. Notice that in this figure, we added mathematical symbols on top of the image by using the overpic command.}
-    \label{fig:torus}
-\end{figure}
+In this project, we apply the sliding window approach with deep recurrent neural networks. As our first models, we start with naive recurrent networks, respectively LSTM and GRU models. As opposed to vanilla RNN, LSTM and GRU networks partially solve the problem of vanishing gradient by employing a gating mechanism to regulate the amount of information to carry from previous time steps. Our input has the following shape: (\emph{batch\_size}, \emph{window\_size}, \emph{feature\_size}). Moreover, we assume that there exists a local pattern that we can leverage to predict future prices. In fact, in a third model, we make use of CNN layers to extract such information across time steps. It consists of a convolutional layer followed by an LSTM layer, then connected to two dense layers. As a fourth model, we employ the attention mechanism over our input data and then feed it to an LSTM layer. In particular, we employ a multi-head self-attention mechanism \emph{to jointly attend to information from different representation subspaces at different positions} \cite{46201}.
 
-\paragraph*{Table.}
-Tables can be used to report quantitative results, here is one random example:
+% ------------------------------------------------------------------------------
+\section{Hyperparameters}
+
+In this section, we present a subset of the hyperparameters used. However, it is not intended to be an exhaustive list of all the hyperparameter. The list of runs is logged using wandb \cite{wandb} and can be reached at \href{https://wandb.ai/leonardoemili/spf?workspace=user-leonardoemili}{link}.
 
 \begin{table}[h!]
-\caption{Performance comparison.}
-\label{tab:results}
-\begin{center}
-\begin{small}
-\begin{tabular}{p{0.16\linewidth} | ccccc}
-\toprule
-& \multirow{2}{0.1\linewidth}{$\beta$ VAE}& \multirow{2}{0.1\linewidth}{DCI Dis.}& \multirow{2}{0.1\linewidth}{MIG}& \multirow{2}{0.1\linewidth}{MIG-PCA}& \multirow{2}{0.1\linewidth}{MIG-KM}\\
-\#factors \\
-\midrule
-One      & 100\% & \textbf{99.0\%} &  63.7\% & 73.5\% &  69.2\%  \\
-Variable & 98.9\% & 94.9\% & 62.3\% &  70.5\%& \textbf{66.9\%} \\
-\bottomrule
-\end{tabular}
-\end{small}
-\end{center}
-\vspace{-0.5cm}
+    \caption{List of hyperparameters.}
+    \label{tab:hparams}
+    \begin{center}
+    \begin{small}
+    \begin{tabular}{p{2cm}p{1cm}}
+    \toprule \multirow{2}{2cm}{Hyperparameter} & \multirow{2}{0.1\linewidth}{Value}\\
+    \\
+    \midrule
+    Window size & 20 \\
+    Step size & 1 \\
+    Optimizer & SGD \\
+    Batch size & 1024 \\
+    \bottomrule
+    \end{tabular}
+    \end{small}
+    \end{center}
+    \vspace{-0.5cm}
 \end{table}
 
-\paragraph*{Bibliography.}
-This is an example bibliographic reference \cite{anderson2008end}. If you want to add more, you must edit the file ``references.bib''.
+% ------------------------------------------------------------------------------
+\section{Experimental results}
 
+As the evaluation framework, we consider multiple metrics in order to assess the quality of a particular model. Since we are dealing with a regression task it comes naturally to adopt the Mean Squared Error (MSE) measure as a proxy to indicate how well a model performs. We also consider the R-squared statistical measure to check how similar the predicted and the observed data are similar. However, since we are aware that R-squared increases when adding more independent variables, we use the adjusted r-squared. Its formulation is similar to the one of r-square and only differs from the degrees of freedom. Finally, we measure the real performances of our system according to the return of a trading strategy. The system is designed to buy whenever the predicted price is higher than the current one, and when the day after we close the position, we register the gain or the loss.
+\underline{\textbf{TODO:}} explain what are our best performing models and the reasons why they perform so well.
+
+\begin{table}[h!]
+    \caption{Performance comparison.}
+    \label{tab:results}
+    \begin{center}
+    \begin{small}
+    %\begin{tabular}{p{0.26\linewidth} | ccccc}
+    \begin{tabular}{p{1.7cm}p{0.55cm}p{0.55cm}p{0.9cm}p{1.7cm}p{0.8cm}}
+    \toprule
+    & \multirow{2}{0.1\linewidth}{MSE}& \multirow{2}{0.1\linewidth}{R2}& \multirow{2}{0.1\linewidth}{Adjusted R2}& \multirow{2}{\linewidth}{Operation accuracy (\%)}& \multirow{2}{0.1\linewidth}{Return (\%)}\\
+    \\
+    \midrule
+    Naive LSTM      & 0.045 & 0.985 & 0.955 & \textbf{85.79} &  419.12  \\
+    Naive GRU & 0.062 & 0.988 & 0.970 & 85.11 &  \textbf{422.87}  \\
+    CNN-LSTM & 0.033 & 0.988 & 0.968 & 83.52 &  390.87  \\
+    Attention-based LSTM & \textbf{0.022} & \textbf{0.991} & \textbf{0.977} & 0.8102 &  420.26  \\
+    \bottomrule
+    \end{tabular}
+    \end{small}
+    \end{center}
+    \vspace{-0.5cm}
+\end{table}
+
+% ------------------------------------------------------------------------------
+\section{Conclusions}
+
+\underline{\textbf{TODO:}} Add conclusions here ..
+
+% Cool image with caption example
+%\begin{figure}[t]
+%    \centering
+%    \begin{overpic}[width=0.99\linewidth]{./torus.png}
+%    \put(-1, 21){\color{blue}\footnotesize $\mathcal{M}_2$ }
+%    \put(13, 12){\color{red}\footnotesize $\mathcal{M}_1$ }
+%    \put(93, 30){\footnotesize $\mathcal{Z}$ }
+%    \put(79, 26){\scriptsize $z_2$ }
+%    \put(88, 26){\scriptsize $z_1$ }
+%    \end{overpic}
+%    \caption{In the figure caption, you can write what you want including formulas, e.g. $\mathcal{X} \subset \mathbb{R}^3$. Notice that in this figure, we added mathematical symbols on top of the image by using the overpic command.}
+%    \label{fig:torus}
+%\end{figure}
 
 \bibliography{references.bib}
 \bibliographystyle{dlai2021}
