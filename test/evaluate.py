@@ -13,10 +13,12 @@ try:
     # Parse the options
     opts, _ = getopt.getopt(sys.argv[1:], "n:")
     samples_num = int(opts[0][1])
-except IndexError: pass
+except IndexError:
+    pass
 except Exception:
     print('usage: evaluate.py [-n N]', file=sys.stderr)
     exit(1)
+
 
 class SimpleLSTM(nn.Module):
     def __init__(self, hparams):
@@ -70,7 +72,8 @@ def evaluate(
         loss_fn,
         data,
         model_name='LSTM',
-        log_precision=4):
+        log_precision=4
+):
     x, y = data['X'], data['Y']
     y_hat = model(x.float())
     loss = loss_fn(y_hat, y.float())
@@ -85,7 +88,7 @@ def evaluate(
     pairs = list(zip(y, y_hat))
     samples = sample(pairs, samples_num)
 
-    print(f'Log {samples_num} samples\n')
+    print(f'Showing {samples_num} samples\n')
     print('Real\tPredicted\tDifference')
     for sample_y, sample_y_hat in samples:
         diff = round(sample_y.item() - sample_y_hat.item(), log_precision)
@@ -100,13 +103,13 @@ if __name__ == '__main__':
     # Initialize the model and load pretrained parameters
     hparams = HParams()
     model = SimpleLSTM(hparams)
-    model.load_state_dict(torch.load('weights.pt'))
+    model.load_state_dict(torch.load('data/weights.pt'))
     model.eval()
 
     # Define the objective loss function
     loss_fn = nn.MSELoss()
 
     # Load samples from test set
-    test_data = torch.load('test_data.pt')
+    test_data = torch.load('data/test_data.pt')
 
     evaluate(model, loss_fn, test_data)
