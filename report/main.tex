@@ -163,7 +163,7 @@ to adopt the Mean Squared Error (MSE) measure as a proxy to indicate how well a 
 performs. We also consider the R-squared statistical measure to check how similar
 the predicted and the observed data are similar. However, since we are aware
 that R-squared increases when adding more independent variables, we use the
-adjusted r-squared. Its formulation is similar to the one of r-square and only
+adjusted R-squared. Its formulation is similar to the one of R-squared and only
 differs from the degrees of freedom. Finally, we measure the real performances
 of our system according to the return of a trading strategy. The system is
 designed to buy a fixed amount of stocks whenever the predicted price of
@@ -178,7 +178,12 @@ to assess the goodness of the model in performing this task. In fact, a model co
 simply replicate the price of the previous day by applying the identity function and obtain
 decent MSE. This is because the relative change in price between two subsequent days is
 very small on average. However, such a model would make very careless predictions that
-would be of no help to a potential investor. 
+would be of no help to a potential investor. \\
+In table \ref{tab:results} are shown the quantitative results obtained with the models.
+Considering the regression metrics, we can see that our novel architectures (i.e. self-attention
+and convolutional) outpeformed the standard recurrent units. In fact, the attention-based
+LSTM reached the very best results in those terms. On the other hand, the differences in
+profit were negligible among the various methods.
 \underline{\textbf{TODO:}} explain what are our best performing models and the reasons why they perform so well.
 
 \begin{table}[h!]
@@ -205,6 +210,19 @@ would be of no help to a potential investor.
 
 % ------------------------------------------------------------------------------
 \section{Conclusions}
+
+We have seen a stock price prediction deep learning approach that brought several
+recurrence-based architectures to the table. At the beginning of this work we questioned
+ourself about the feasibility of such predictions that go against the efficient markets'
+theory. We demonstrated that a model is actually capable of extracting some patterns and
+use them to make profitable decisions. Thus, markets may have been not so efficient during
+the periods that are present in our dataset, especially in the 2013 test set. We would
+argue that the predictions made by these models could vary very much in profitability
+in different periods in time, affected by different events and circumstances. Furthermore,
+a potential widespread use of similar models by large istitutions and individual investors
+can eventually annihilate their effectiveness, since the information extracted by them would
+be reflected in the prices. So, in order to keep the same levels of profit, possible
+alternatives could be more sophisticated architectures or more prior assumptions.  
 
 \underline{\textbf{TODO:}} Add conclusions here ..
 
