@@ -186,28 +186,30 @@ LSTM reached the very best results in those terms. On the other hand, the differ
 profit were negligible among the various methods.
 \underline{\textbf{TODO:}} explain what are our best performing models and the reasons why they perform so well.
 
-\begin{table}[h!]
-    \caption{Performance comparison.}
-    \label{tab:results}
-    \begin{center}
-    \begin{small}
-    %\begin{tabular}{p{0.26\linewidth} | ccccc}
-    \begin{tabular}{p{1.7cm}p{0.55cm}p{0.55cm}p{0.9cm}p{1.7cm}p{0.8cm}}
-    \toprule
-    & \multirow{2}{0.1\linewidth}{MSE}& \multirow{2}{0.1\linewidth}{R2}& \multirow{2}{0.1\linewidth}{Adjusted R2}& \multirow{2}{\linewidth}{Operation accuracy (\%)}& \multirow{2}{0.1\linewidth}{Return (\%)}\\
-    \\
-    \midrule
-    Naive LSTM      & 0.045 & 0.985 & 0.955 & \textbf{85.79} &  419.12  \\
-    Naive GRU & 0.062 & 0.988 & 0.970 & 85.11 &  \textbf{422.87}  \\
-    CNN-LSTM & 0.033 & 0.988 & 0.968 & 83.52 &  390.87  \\
-    Attention-based LSTM & \textbf{0.022} & \textbf{0.991} & \textbf{0.977} & 0.8102 &  420.26  \\
-    \bottomrule
+\begin{table}[]
+    \begin{tabular}{lllll}
+    \hline
+    \multicolumn{1}{|l|}{Ticker} & \multicolumn{1}{l|}{Architecture}                              & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}MSE\\ (* 10\textasciicircum{}-4)\end{tabular}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Op\\ Acc. (\%)\end{tabular}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Year\\ Ret. (\%)\end{tabular}} \\ \hline
+    AAPL                               & Naive GRU                                                      & 5                                                                                             & 68                                                                                     & 176                                                                               \\
+    AAPL                               & Naive LSTM                                                     & 773                                                                                           & 70                                                                                     & 107                                                                               \\
+    AAPL                               & \begin{tabular}[c]{@{}l@{}}Attention\\ LSTM\end{tabular} & 49                                                                                            & 74                                                                                     & 220                                                                               \\
+    AAPL                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ LSTM\end{tabular}     & 279                                                                                           & 68                                                                                     & 61                                                                           \\
+    GE                               & Naive GRU                                                      & 102                                                                                              & 59                                                                                     & 145                                                                               \\
+    GE                               & Naive LSTM                                                     & 158                                                                                            & 55                                                                                     & 114                                                                               \\
+    GE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ LSTM\end{tabular} & 209                                                                                            & 53                                                                                     & 58                                                                               \\
+    GE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ LSTM\end{tabular}     & 251                                                                                           & 65                                                                                     & 126                                                                           \\
+    PFE                               & Naive GRU                                                      & 91                                                                                             & 61                                                                                     & 149                                                                               \\
+    PFE                               & Naive LSTM                                                     & 172                                                                                           & 60                                                                                    & 143                                                                               \\
+    PFE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ LSTM\end{tabular} & 104                                                                                            & 68                                                                                & 145                                                                               \\
+    PFE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ LSTM\end{tabular}     & 84                                                                                           & 55                                                                                     & 141                                                                           \\
+    T                               & Naive GRU                                                      & 14                                                                                             & 70                                                                                     & 179                                                                               \\
+    T                               & Naive LSTM                                                     & 32                                                                                           & 60                                                                                     & 143                                                                               \\
+    T                               & \begin{tabular}[c]{@{}l@{}}Attention\\ LSTM\end{tabular} & 5                                                                                            & 68                                                                                     & 144                                                                               \\
+    T                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ LSTM\end{tabular}     & 3                                                                                           & 55                                                                                     & 141                                                                           \\
     \end{tabular}
-    \end{small}
-    \end{center}
-    \vspace{-0.5cm}
-\end{table}
-
+    \caption{Results comparison: MSE, operation accuracy, and year return using trading strategy.}
+    \label{tab:results}
+    \end{table}
 % ------------------------------------------------------------------------------
 \section{Conclusions}
 
