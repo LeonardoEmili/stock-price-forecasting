@@ -62,7 +62,7 @@ Some approaches have been explored in this direction, such as in \cite{32066186}
 % ------------------------------------------------------------------------------
 \section{Dataset}
 
-Data wrangling operations have been crucial for this task. In fact, we start considering the S\&P 500 stock data, which is a collection of daily stock prices for all companies from the S\&P 500 index. This dataset provides us with the following features: open price, highest price, lowest price, close price, volume, stock ticker, and date. We also consider an auxiliary dataset that provides us with fundamental data from Yahoo Finance. The dataset contains the following columns: Forward P/E, DE Ratio, Earnings Growth, Enterprise Value/EBITDA, EBITDA, Current Ratio, Cash Flow, Trailing P/E, Beta, PEG Ratio, Gross Profit, Total Debt, Price, Return on Equity, Return on Assets, Price/Book, Revenue Growth, Operating Margin, Enterprise Value/Revenue, Revenue, Total Cash, Enterprise Value, Total Cash Per Share, Profit Margin, Price/Sales, Book Value Per Share, Diluted EPS, Market Cap, Revenue Per Share, Net Income Avl to Common, Ticker, Date. Based on the date column, we can align the two datasets such that for each event in the S\&P 500 dataset, we have the latest available financial report. From now on, we will refer to the dataset obtained from the alignment process simply as the dataset.
+Data wrangling operations have been crucial for this task. In fact, we start considering the S\&P 500 stock data, which is a collection of daily stock prices for all companies from the S\&P 500 index. This dataset provides us with the following features: open price, high price, low price, close price, volume, stock ticker, and date. We also consider an auxiliary dataset that provides us with fundamental data from Yahoo Finance. The dataset contains the following columns: Forward P/E, DE Ratio, Earnings Growth, Enterprise Value/EBITDA, EBITDA, Current Ratio, Cash Flow, Trailing P/E, Beta, PEG Ratio, Gross Profit, Total Debt, Price, Return on Equity, Return on Assets, Price/Book, Revenue Growth, Operating Margin, Enterprise Value/Revenue, Revenue, Total Cash, Enterprise Value, Total Cash Per Share, Profit Margin, Price/Sales, Book Value Per Share, Diluted EPS, Market Cap, Revenue Per Share, Net Income Avl to Common, Ticker, Date. Based on the date column, we can align the two datasets such that for each event in the S\&P 500 dataset, we have the latest available financial report. From now on, we will refer to the dataset obtained from the alignment process simply as the dataset.
 
 \subsection{Feature engineering}
 
@@ -174,23 +174,25 @@ of our system according to the return of a trading strategy. The system is
 designed to buy a fixed amount of stocks whenever the predicted price of
 the following day is higher than the current one. Then, it closes the position after one
 day and registers the gain or the loss. This way, the profit expectations can be compared
-among all the models. Another metric that we took into consideration was the operation's
+among all the models. Another metric that we took looked at was the operation's
 accuracy. That is an unconventional metric that we decided to adopt to understand the
 fraction of times that the model predicted the correct trend. In other words, when the model
-predicted a price gain and the real outcome was actually a gain. The reason why we
-implemented these additional evaluation steps is because regression metrics were not enough
+predicted a price gain and the real outcome was actually a gain.
+Regression metrics alone were not enough
 to assess the goodness of the model in performing this task. In fact, a model could
 simply replicate the price of the previous day by applying the identity function and obtain
 decent MSE. This is because the relative change in price between two subsequent days is
 very small on average. However, such a model would make very careless predictions that
 would be of no help to a potential investor. \\
-In table \ref{tab:results} are shown the quantitative results obtained with the models.
+Table \ref{tab:results} shows the quantitative results obtained with the models.
 We test the models on single stocks that were picked in the index. It can be seen that, in some cases,
 the models have considerably different results on different stocks. This reflects the fact that the trend
 of some stocks is more predictable than others. In fact, many different factors affect the dynamics of companies.
 For example, we notice higher return on AAPL that is a growth company, compared to GE which is instead
 considered more of a value stock. Growth stocks usually come with more volatility in the price, and this could
-justify this difference in profitability.
+justify this difference in profitability. Different models work better with different stocks. So,
+we could pick the model that maximizes profit on a given asset and use that to predict
+that particular asset.
 Considering the annual profit generated using our trading strategy,
 we can see that the predictions made by our novel architectures (i.e. self-attention
 and convolutional) outpeformed the standard recurrent approaches. In fact, either the attention-based
@@ -205,18 +207,18 @@ These results reflect the correctness of our assumptions on the patterns of our 
     AAPL                               & Naive LSTM                                                     & 773                                                                                           & 70                                                                                     & 107                                                                               \\
     AAPL                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 79                                                                                            & 64                                                                                     & 213                                                                               \\
     AAPL                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 72                                                                                           & 67                                                                                     & 306                                                                           \\
-    GE                               & Naive GRU                                                      & 102                                                                                              & 59                                                                                     & 145                                                                               \\
-    GE                               & Naive LSTM                                                     & 158                                                                                            & 55                                                                                     & 114                                                                               \\
+    GE                               & Naive GRU                                                      & 112                                                                                              & 57                                                                                     & 92                                                                               \\
+    GE                               & Naive LSTM                                                     & 158                                                                                            & 55                                                                                     & 113                                                                               \\
     GE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 92                                                                                            & 59                                                                                     & 127                                                                               \\
     GE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 115                                                                                           & 57                                                                                     & 133                                                                           \\
     PFE                               & Naive GRU                                                      & 91                                                                                             & 61                                                                                     & 149                                                                               \\
     PFE                               & Naive LSTM                                                     & 172                                                                                           & 60                                                                                    & 143                                                                               \\
     PFE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 14                                                                                            & 75                                                                                & 175                                                                               \\
     PFE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 10                                                                                           & 75                                                                                     & 193                                                                           \\
-    T                               & Naive GRU                                                      & 14                                                                                             & 70                                                                                     & 179                                                                               \\
-    T                               & Naive LSTM                                                     & 32                                                                                           & 60                                                                                     & 143                                                                               \\
-    T                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 12                                                                                            & 72                                                                                     & 54                                                                               \\
-    T                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 7                                                                                           & 68                                                                                     & 72                                                                           \\
+    T                               & Naive GRU                                                      & 14                                                                                             & 61                                                                                     & 84                                                                               \\
+    T                               & Naive LSTM                                                     & 32                                                                                           & 59                                                                                     & 50                                                                               \\
+    T                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 12                                                                                            & 54                                                                                     & 67                                                                               \\
+    T                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 7                                                                                           & 65                                                                                     & 85                                                                           \\
     \end{tabular}
     \caption{Results comparison: MSE, operation accuracy, and year return using trading strategy.}
     \label{tab:results}
@@ -235,7 +237,7 @@ in different periods in time, affected by different events and circumstances. Fu
 a potential widespread use of similar models by large institutions and individual investors
 could eventually annihilate their effectiveness, since the information extracted by them would
 be reflected in the prices. So, in order to keep the same levels of profit, possible
-alternatives could be more sophisticated architectures or more prior assumptions.  
+alternatives could be more advanced architectures or more prior assumptions.  
 
 % Cool image with caption example
 %\begin{figure}[t]
