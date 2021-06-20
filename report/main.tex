@@ -91,7 +91,7 @@ and oversold events. In fact, using this technical indicator, we could extract t
 overbought and oversold binary features too. According to the RSI definition,
 a value that goes higher than 70 can be interpreted as a situation of overbought.
 Similarly, a value that goes below 30 is seen as a situation of oversold. 
-When dealing with articulated models, there is not need to add such trivial features
+When dealing with articulated models, there is not need to add such binary features
 since they can be easily extracted from the underlying data, the price in our case.
 Another step of the feature engineering process involved scaling the features to put them
 on similar scales. This step was very important considering that we are using stochastic gradient
@@ -195,7 +195,7 @@ we could pick the model that maximizes profit on a given asset and use that to p
 that particular asset.
 Considering the annual profit generated using our trading strategy,
 we can see that the predictions made by our novel architectures (i.e. GRU with self-attention
-and CNN-based) outpeformed the standard recurrent approaches. In fact, either the attention-based
+and convolutional) outpeformed the standard recurrent approaches. In fact, either the attention-based
 or the convolutional GRU reached the very best results in those terms for a given stock.
 
 \begin{table}[h]
