@@ -52,7 +52,7 @@ of human behavioral irrationality lead to strong operation correlation reflected
 markets \cite{adaptive_markets}. Therefore, the task of predicting stock prices based
 on past data seems not to be completely inapproachable. Over the years,
 many methods have been proposed to tackle the task: ranging from the Naive Forecast approach, which trivially forecasts the stock value to be the last observed one, up to the most recent ones that heavily rely on machine learning techniques. In this context, we will delve into the topic of stock price prediction using fundamental data to assess whether a stock is attractive to investors. 
-This technique, as opposed to technical analysis, considers prices, as well as financial reports, to model the problem. Here, the underlying assumption is that one cannot tell whether it's worth buying a stock only by looking at its current price and volumes. Indeed, quarterly released financial reports about companies and external information (e.g. the common sentiment on a stock ticker) may be crucial to assess the quality of a given stock. In this project, we experimented with the effectiveness of deep learning techniques applied to the stock price prediction task. The key idea is the use of recurrent neural networks that are able to exploit temporal dependencies of events, hence conditioning the presence of an event at timestep \emph{t} on the previous events at \emph{t-1, t-2, \ldots}. 
+This technique, as opposed to technical analysis, considers prices, as well as financial reports, to model the problem. Here, the underlying assumption is that one cannot tell whether it is worth buying a stock only by looking at its current price and volumes. Indeed, quarterly released financial reports about companies and external information (e.g. the common sentiment on a stock ticker) may be crucial to assess the quality of a given stock. In this project, we experimented with the effectiveness of deep learning techniques applied to the stock price prediction task. The key idea is the use of recurrent neural networks that are able to exploit temporal dependencies of events, hence conditioning the presence of an event on previous events.
 
 % ------------------------------------------------------------------------------
 \section{Related work}
@@ -62,7 +62,7 @@ Some approaches have been explored in this direction, such as in \cite{32066186}
 % ------------------------------------------------------------------------------
 \section{Dataset}
 
-Data wrangling operations have been crucial for this task. In fact, we start considering the S\&P 500 stock data, which is a collection of daily stock prices for all companies from the S\&P 500 index. This dataset provides us with the following features: open price, high price, low price, close price, volume, stock ticker, and date. We also consider an auxiliary dataset that provides us with fundamental data from Yahoo Finance. The dataset contains the following columns: Forward P/E, DE Ratio, Earnings Growth, Enterprise Value/EBITDA, EBITDA, Current Ratio, Cash Flow, Trailing P/E, Beta, PEG Ratio, Gross Profit, Total Debt, Price, Return on Equity, Return on Assets, Price/Book, Revenue Growth, Operating Margin, Enterprise Value/Revenue, Revenue, Total Cash, Enterprise Value, Total Cash Per Share, Profit Margin, Price/Sales, Book Value Per Share, Diluted EPS, Market Cap, Revenue Per Share, Net Income Avl to Common, Ticker, Date. Based on the date column, we can align the two datasets such that for each event in the S\&P 500 dataset, we have the latest available financial report. From now on, we will refer to the dataset obtained from the alignment process simply as the dataset.
+Data wrangling operations have been crucial for this task. In fact, we start considering the S\&P 500 stock data, which is a collection of daily stock prices for all companies from the S\&P 500 index. This dataset provides us with the following features: open price, high price, low price, close price, volume, stock ticker, and date. We also consider an auxiliary dataset that provides us with fundamental data from Yahoo Finance. The dataset contains the following columns: Forward P/E, DE Ratio, Earnings Growth, Enterprise Value/EBITDA, EBITDA, Current Ratio, Cash Flow, Trailing P/E, Beta, PEG Ratio, Gross Profit, Total Debt, Price, Return on Equity, Return on Assets, Price/Book, Revenue Growth, Operating Margin, Enterprise Value/Revenue, Revenue, Total Cash, Enterprise Value, Total Cash Per Share, Profit Margin, Price/Sales, Book Value Per Share, Diluted EPS, Market Cap, Revenue Per Share, Net Income Avl to Common, Ticker, Date. Based on the date column, we can align the two datasets such that for each event in the S\&P 500 dataset, we have the latest available financial report. From now on, we will refer to the dataset obtained from the alignment process simply as the \emph{dataset}.
 
 \subsection{Feature engineering}
 
@@ -90,38 +90,38 @@ exponentially smoothed moving average. Therefore, it makes it easy to spot overb
 and oversold events. In fact, using this technical indicator, we could extract the
 overbought and oversold binary features too. According to the RSI definition,
 a value that goes higher than 70 can be interpreted as a situation of overbought.
-Similarly, a value that goes below 30 is seen as a situation of oversold. An articulated
-model could of course extract this kind of information directly from the price, but manually
-adding these knownly meaningful indicators definitely simplifies the work of the network.
+Similarly, a value that goes below 30 is seen as a situation of oversold. 
+When dealing with articulated models, there is not need to add such trivial features
+since they can be easily extracted from the underlying data, the price in our case.
 Another step of the feature engineering process involved scaling the features to put them
-on similar scales. This step was very important considering that we are using gradient
-descent to optimize the models and having features with completely different scales would
-have made the convergence task much harder. Therefore, we globally scaled prices,
-volumes, technical indicator values, fundamentals, etc. At this point, all the features
-were centered on the same scale.
+on similar scales. This step was very important considering that we are using stochastic gradient
+descent (SGD) to optimize the models and having features with completely different scales would
+have made the convergence task much harder. Therefore, we applied scaling to numerical columns such as: prices,
+volumes, technical indicator values, fundamentals, etc. At this point, we get all features
+to have zero mean and unit variance.
 Before training the model, we split the dataset into three subsets: \emph{train set},
 \emph{dev set} and \emph{test set}. These are respectively meant for training the model,
 tuning its hyperparameters and testing its performance. Since the core idea of the project
 is forecasting future events by looking at past data, we cannot leak future information in
 the train set. Therefore, we split the dataset by years. Having temporal data ranging from
-2004 to 2013, we dedicate the years 2004 - 2011 to the train set, 2012 to the dev set, and
+late 2003 to 2013, we dedicate the years from 2003 to 2011 to the train set, 2012 to the dev set, and
 2013 to the test set. This way, the procedure is similar to backtesting the model strategy
 on present events.
-In order to predict the target adjusted close price, we consider the dataset according to the sliding window approach, also known as the lag method. In this way, we decompose the original dataset with overlapping windows and condition the target value only on its lag. During the training phase, we treat both the step size (i.e. the number of days before a new window) and the window size (i.e. the size of the lag) as hyperparameters and tune them accordingly.
+In order to predict the target adjusted close price, we consider the dataset according to the \emph{sliding window approach}, also known as the \emph{lag method}. In this way, we decompose the original dataset with overlapping windows and condition the target value only on its lag. During the training phase, we treat both the step size (i.e. the number of days before the next window) and the window size (i.e. the size of the lag) as hyperparameters and tune them accordingly.
 
 % ------------------------------------------------------------------------------
 \section{Models}
 
 In this project, we apply the sliding window approach with deep recurrent neural networks. As our first models, we start with naive recurrent networks, respectively LSTM and GRU models. As opposed to vanilla RNN, LSTM and GRU networks partially solve the problem of vanishing gradient by employing a gating mechanism to regulate the amount of information to carry from previous time steps \cite{vanishing}.
-Our input has the following shape: (\emph{batch\_size}, \emph{window\_size}, \emph{feature\_size}).
+The input data has the following shape: (\emph{batch\_size}, \emph{window\_size}, \emph{feature\_size}).
 Our initial idea was to build other components on top of the LSTM architecture in order to leverage some intuitions
-and assumptions that we had on the nature of our data. By comparing the performance of the naive GRU and LSTM
-architectures, we experienced a quite noticeable improvement using the GRU over the other one. Therefore, we decided
+and assumptions that we had on the nature of our data. By comparing the performance of naive GRU and LSTM
+architectures, we experienced a quite noticeable improvement using the GRU over the latter. Therefore, we decided
 to build our modified architectures on top of the GRU. The GRU is a more recent alternative to the LSTM.
 In particular, it condenses the memory addition and deletion gates into a single one, which is just an input gate
 for the memory vector. This makes the GRU a simpler architecture that is much faster to train and that delivers
 better results in many use cases, especially with datasets of modest sizes.
-We assume that there exists a local pattern that we can leverage to predict future prices.
+Furthermore, we assume that there exists a local pattern that we can leverage to predict future prices.
 In fact, in a third model, we make use of CNN layers to extract such information across
 time steps. It consists of a convolutional layer followed by a GRU layer, then connected
 to two dense layers. The convolutional layer is meant to extract high level patterns that
@@ -129,7 +129,7 @@ form across time steps inside a window. This information is then also passed thr
 recurrent unit in order to get enriched by means of temporal sequencial correlation.
 As a fourth model, we employ the attention mechanism over our input
 data and then feed it to a GRU layer. In particular, we employ a multi-head
-self-attention mechanism \emph{to jointly attend to information from different
+self-attention mechanism to exploit the idea \emph{to jointly attend to information from different
 representation subspaces at different positions} \cite{46201}. Similarly to the previous
 model, here the idea is to process the raw input sequence by enriching it via a preliminary
 layer, and then extracting its sequential information via the GRU layer. However, in this
@@ -194,31 +194,33 @@ justify this difference in profitability. Different models work better with diff
 we could pick the model that maximizes profit on a given asset and use that to predict
 that particular asset.
 Considering the annual profit generated using our trading strategy,
-we can see that the predictions made by our novel architectures (i.e. self-attention
-and convolutional) outpeformed the standard recurrent approaches. In fact, either the attention-based
+we can see that the predictions made by our novel architectures (i.e. GRU with self-attention
+and CNN-based) outpeformed the standard recurrent approaches. In fact, either the attention-based
 or the convolutional GRU reached the very best results in those terms for a given stock.
-These results reflect the correctness of our assumptions on the patterns of our time-series data.
 
-\begin{table}[]
+\begin{table}[h]
     \begin{tabular}{lllll}
-    \hline
-    \multicolumn{1}{|l|}{Ticker} & \multicolumn{1}{l|}{Architecture}                              & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}MSE\\ (* 10\textasciicircum{}-4)\end{tabular}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Op\\ Acc. (\%)\end{tabular}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Year\\ Ret. (\%)\end{tabular}} \\ \hline
-    AAPL                               & Naive GRU                                                      & 5                                                                                             & 68                                                                                     & 176                                                                               \\
-    AAPL                               & Naive LSTM                                                     & 773                                                                                           & 70                                                                                     & 107                                                                               \\
+    \toprule
+    \multicolumn{1}{l}{Ticker} & \multicolumn{1}{l}{Architecture} & \multicolumn{1}{l}{\begin{tabular}[c]{@{}l@{}}MSE\\ ($*10^{-4}$)\end{tabular}} & \multicolumn{1}{l}{\begin{tabular}[c]{@{}l@{}}Operation\\ Accuracy\\(\%)\end{tabular}} & \multicolumn{1}{l}{\begin{tabular}[c]{@{}l@{}}Year\\ Return\\(\%)\end{tabular}} \\ \midrule
+    AAPL                               & Naive GRU                                                      & \textbf{5}                                                                                             & 68                                                                                     & 176                                                                               \\
+    AAPL                               & Naive LSTM                                                     & 773                                                                                           & \textbf{70}                                                                                     & 107                                                                               \\
     AAPL                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 79                                                                                            & 64                                                                                     & 213                                                                               \\
-    AAPL                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 72                                                                                           & 67                                                                                     & 306                                                                           \\
+    AAPL                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 72                                                                                           & 67                                                                                     & \textbf{306}                                                                           \\
+    \midrule
     GE                               & Naive GRU                                                      & 112                                                                                              & 57                                                                                     & 92                                                                               \\
     GE                               & Naive LSTM                                                     & 158                                                                                            & 55                                                                                     & 113                                                                               \\
-    GE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 92                                                                                            & 59                                                                                     & 127                                                                               \\
-    GE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 115                                                                                           & 57                                                                                     & 133                                                                           \\
+    GE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & \textbf{92}                                                                                            & \textbf{59}                                                                                     & 127                                                                               \\
+    GE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 115                                                                                           & 57                                                                                     & \textbf{133}                                                                           \\
+    \midrule
     PFE                               & Naive GRU                                                      & 91                                                                                             & 61                                                                                     & 149                                                                               \\
     PFE                               & Naive LSTM                                                     & 172                                                                                           & 60                                                                                    & 143                                                                               \\
-    PFE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 14                                                                                            & 75                                                                                & 175                                                                               \\
-    PFE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 10                                                                                           & 75                                                                                     & 193                                                                           \\
+    PFE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 14                                                                                            & \textbf{75}                                                                                & 175                                                                               \\
+    PFE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & \textbf{10}                                                                                           & \textbf{75}                                                                                     & \textbf{193}                                                                           \\
+    \midrule
     T                               & Naive GRU                                                      & 14                                                                                             & 61                                                                                     & 84                                                                               \\
     T                               & Naive LSTM                                                     & 32                                                                                           & 59                                                                                     & 50                                                                               \\
     T                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 12                                                                                            & 54                                                                                     & 67                                                                               \\
-    T                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 7                                                                                           & 65                                                                                     & 85                                                                           \\
+    T                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & \textbf{7}                                                                                           & \textbf{65}                                                                                     & \textbf{85}                                                                           \\
     \end{tabular}
     \caption{Results comparison: MSE, operation accuracy, and year return using trading strategy.}
     \label{tab:results}
@@ -238,20 +240,6 @@ a potential widespread use of similar models by large institutions and individua
 could eventually annihilate their effectiveness, since the information extracted by them would
 be reflected in the prices. So, in order to keep the same levels of profit, possible
 alternatives could be more advanced architectures or more prior assumptions.  
-
-% Cool image with caption example
-%\begin{figure}[t]
-%    \centering
-%    \begin{overpic}[width=0.99\linewidth]{./torus.png}
-%    \put(-1, 21){\color{blue}\footnotesize $\mathcal{M}_2$ }
-%    \put(13, 12){\color{red}\footnotesize $\mathcal{M}_1$ }
-%    \put(93, 30){\footnotesize $\mathcal{Z}$ }
-%    \put(79, 26){\scriptsize $z_2$ }
-%    \put(88, 26){\scriptsize $z_1$ }
-%    \end{overpic}
-%    \caption{In the figure caption, you can write what you want including formulas, e.g. $\mathcal{X} \subset \mathbb{R}^3$. Notice that in this figure, we added mathematical symbols on top of the image by using the overpic command.}
-%    \label{fig:torus}
-%\end{figure}
 
 \bibliography{references.bib}
 \bibliographystyle{dlai2021}
