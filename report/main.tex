@@ -10,13 +10,13 @@
 \usepackage[accepted]{dlai2021}
 
 %%% STUDENTS: FILL IN WITH YOUR OWN INFORMATION
-\dlaititlerunning{Stock Price Forecasting using LSTM}
+\dlaititlerunning{Stock Price Forecasting using GRU}
 
 \begin{document}
 
 \twocolumn[
 %%% STUDENTS: FILL IN WITH YOUR OWN INFORMATION
-\dlaititle{Stock Price Forecasting using LSTM}
+\dlaititle{Stock Price Forecasting using GRU}
 
 \begin{center}\today\end{center}
 
@@ -42,7 +42,7 @@
 %\end{abstract}
 
 % ------------------------------------------------------------------------------
-\section{Introdution}
+\section{Introduction}
 
 Stock price prediction is an active field of study where the objective goal is to predict
 the trend of the stock market, typically based on its historical evidence. Despite the
@@ -112,18 +112,27 @@ In order to predict the target adjusted close price, we consider the dataset acc
 % ------------------------------------------------------------------------------
 \section{Models}
 
-In this project, we apply the sliding window approach with deep recurrent neural networks. As our first models, we start with naive recurrent networks, respectively LSTM and GRU models. As opposed to vanilla RNN, LSTM and GRU networks partially solve the problem of vanishing gradient by employing a gating mechanism to regulate the amount of information to carry from previous time steps \cite{vanishing}. Our input has the following shape: (\emph{batch\_size}, \emph{window\_size}, \emph{feature\_size}). Moreover, we assume that there exists a local pattern that we can leverage to predict future prices.
+In this project, we apply the sliding window approach with deep recurrent neural networks. As our first models, we start with naive recurrent networks, respectively LSTM and GRU models. As opposed to vanilla RNN, LSTM and GRU networks partially solve the problem of vanishing gradient by employing a gating mechanism to regulate the amount of information to carry from previous time steps \cite{vanishing}.
+Our input has the following shape: (\emph{batch\_size}, \emph{window\_size}, \emph{feature\_size}).
+Our initial idea was to build other components on top of the LSTM architecture in order to leverage some intuitions
+and assumptions that we had on the nature of our data. By comparing the performance of the naive GRU and LSTM
+architectures, we experienced a quite noticeable improvement using the GRU over the other one. Therefore, we decided
+to build our modified architectures on top of the GRU. The GRU is a more recent alternative to the LSTM.
+In particular, it condenses the memory addition and deletion gates into a single one, which is just an input gate
+for the memory vector. This makes the GRU a simpler architecture that is much faster to train and that delivers
+better results in many use cases, especially with datasets of modest sizes.
+We assume that there exists a local pattern that we can leverage to predict future prices.
 In fact, in a third model, we make use of CNN layers to extract such information across
-time steps. It consists of a convolutional layer followed by an LSTM layer, then connected
+time steps. It consists of a convolutional layer followed by a GRU layer, then connected
 to two dense layers. The convolutional layer is meant to extract high level patterns that
 form across time steps inside a window. This information is then also passed through the
 recurrent unit in order to get enriched by means of temporal sequencial correlation.
 As a fourth model, we employ the attention mechanism over our input
-data and then feed it to an LSTM layer. In particular, we employ a multi-head
+data and then feed it to a GRU layer. In particular, we employ a multi-head
 self-attention mechanism \emph{to jointly attend to information from different
 representation subspaces at different positions} \cite{46201}. Similarly to the previous
 model, here the idea is to process the raw input sequence by enriching it via a preliminary
-layer, and then extracting its sequential information via the LSTM layer. However, in this
+layer, and then extracting its sequential information via the GRU layer. However, in this
 case the attention layer operates differently compared to the CNN one. In fact, it works
 by putting the focus on specific parts of the input sequence. For this task, it can be useful
 since it can understand that specific subsequences of financial data are more meaningful than
@@ -158,17 +167,13 @@ In this section, we present a subset of the hyperparameters used. However, it is
 \section{Experimental results}
 
 As an evaluation framework, we consider multiple metrics in order to assess the quality
-of a particular model. Since we are dealing with a regression task it comes naturally
+of a particular model. Since we are dealing with a regression task, it comes natural
 to adopt the Mean Squared Error (MSE) measure as a proxy to indicate how well a model
-performs. We also consider the R-squared statistical measure to check how similar
-the predicted and the observed data are similar. However, since we are aware
-that R-squared increases when adding more independent variables, we use the
-adjusted R-squared. Its formulation is similar to the one of R-squared and only
-differs from the degrees of freedom. Finally, we measure the real performances
+performs. Then, we measure the real performances
 of our system according to the return of a trading strategy. The system is
 designed to buy a fixed amount of stocks whenever the predicted price of
 the following day is higher than the current one. Then, it closes the position after one
-day and registers the gain or the loss. This way, the profit expectancies can be compared
+day and registers the gain or the loss. This way, the profit expectations can be compared
 among all the models. Another metric that we took into consideration was the operation's
 accuracy. That is an unconventional metric that we decided to adopt to understand the
 fraction of times that the model predicted the correct trend. In other words, when the model
@@ -180,11 +185,17 @@ decent MSE. This is because the relative change in price between two subsequent 
 very small on average. However, such a model would make very careless predictions that
 would be of no help to a potential investor. \\
 In table \ref{tab:results} are shown the quantitative results obtained with the models.
-Considering the regression metrics, we can see that our novel architectures (i.e. self-attention
-and convolutional) outpeformed the standard recurrent units. In fact, the attention-based
-LSTM reached the very best results in those terms. On the other hand, the differences in
-profit were negligible among the various methods.
-\underline{\textbf{TODO:}} explain what are our best performing models and the reasons why they perform so well.
+We test the models on single stocks that were picked in the index. It can be seen that, in some cases,
+the models have considerably different results on different stocks. This reflects the fact that the trend
+of some stocks is more predictable than others. In fact, many different factors affect the dynamics of companies.
+For example, we notice higher return on AAPL that is a growth company, compared to GE which is instead
+considered more of a value stock. Growth stocks usually come with more volatility in the price, and this could
+justify this difference in profitability.
+Considering the annual profit generated using our trading strategy,
+we can see that the predictions made by our novel architectures (i.e. self-attention
+and convolutional) outpeformed the standard recurrent approaches. In fact, either the attention-based
+or the convolutional GRU reached the very best results in those terms for a given stock.
+These results reflect the correctness of our assumptions on the patterns of our time-series data.
 
 \begin{table}[]
     \begin{tabular}{lllll}
@@ -192,20 +203,20 @@ profit were negligible among the various methods.
     \multicolumn{1}{|l|}{Ticker} & \multicolumn{1}{l|}{Architecture}                              & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}MSE\\ (* 10\textasciicircum{}-4)\end{tabular}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Op\\ Acc. (\%)\end{tabular}} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Year\\ Ret. (\%)\end{tabular}} \\ \hline
     AAPL                               & Naive GRU                                                      & 5                                                                                             & 68                                                                                     & 176                                                                               \\
     AAPL                               & Naive LSTM                                                     & 773                                                                                           & 70                                                                                     & 107                                                                               \\
-    AAPL                               & \begin{tabular}[c]{@{}l@{}}Attention\\ LSTM\end{tabular} & 49                                                                                            & 74                                                                                     & 220                                                                               \\
-    AAPL                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ LSTM\end{tabular}     & 279                                                                                           & 68                                                                                     & 61                                                                           \\
+    AAPL                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 79                                                                                            & 64                                                                                     & 213                                                                               \\
+    AAPL                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 72                                                                                           & 67                                                                                     & 306                                                                           \\
     GE                               & Naive GRU                                                      & 102                                                                                              & 59                                                                                     & 145                                                                               \\
     GE                               & Naive LSTM                                                     & 158                                                                                            & 55                                                                                     & 114                                                                               \\
-    GE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ LSTM\end{tabular} & 209                                                                                            & 53                                                                                     & 58                                                                               \\
-    GE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ LSTM\end{tabular}     & 251                                                                                           & 65                                                                                     & 126                                                                           \\
+    GE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 92                                                                                            & 59                                                                                     & 127                                                                               \\
+    GE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 115                                                                                           & 57                                                                                     & 133                                                                           \\
     PFE                               & Naive GRU                                                      & 91                                                                                             & 61                                                                                     & 149                                                                               \\
     PFE                               & Naive LSTM                                                     & 172                                                                                           & 60                                                                                    & 143                                                                               \\
-    PFE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ LSTM\end{tabular} & 104                                                                                            & 68                                                                                & 145                                                                               \\
-    PFE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ LSTM\end{tabular}     & 84                                                                                           & 55                                                                                     & 141                                                                           \\
+    PFE                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 14                                                                                            & 75                                                                                & 175                                                                               \\
+    PFE                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 10                                                                                           & 75                                                                                     & 193                                                                           \\
     T                               & Naive GRU                                                      & 14                                                                                             & 70                                                                                     & 179                                                                               \\
     T                               & Naive LSTM                                                     & 32                                                                                           & 60                                                                                     & 143                                                                               \\
-    T                               & \begin{tabular}[c]{@{}l@{}}Attention\\ LSTM\end{tabular} & 5                                                                                            & 68                                                                                     & 144                                                                               \\
-    T                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ LSTM\end{tabular}     & 3                                                                                           & 55                                                                                     & 141                                                                           \\
+    T                               & \begin{tabular}[c]{@{}l@{}}Attention\\ GRU\end{tabular} & 12                                                                                            & 72                                                                                     & 54                                                                               \\
+    T                               & \begin{tabular}[c]{@{}l@{}}Convolution\\ GRU\end{tabular}     & 7                                                                                           & 68                                                                                     & 72                                                                           \\
     \end{tabular}
     \caption{Results comparison: MSE, operation accuracy, and year return using trading strategy.}
     \label{tab:results}
@@ -221,12 +232,10 @@ use them to make profitable decisions. Thus, markets may have been not so effici
 the periods that are present in our dataset, especially in the 2013 test set. We would
 argue that the predictions made by these models could vary very much in profitability
 in different periods in time, affected by different events and circumstances. Furthermore,
-a potential widespread use of similar models by large istitutions and individual investors
-can eventually annihilate their effectiveness, since the information extracted by them would
+a potential widespread use of similar models by large institutions and individual investors
+could eventually annihilate their effectiveness, since the information extracted by them would
 be reflected in the prices. So, in order to keep the same levels of profit, possible
 alternatives could be more sophisticated architectures or more prior assumptions.  
-
-\underline{\textbf{TODO:}} Add conclusions here ..
 
 % Cool image with caption example
 %\begin{figure}[t]
